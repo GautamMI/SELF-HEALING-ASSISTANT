@@ -1,0 +1,25 @@
+{
+  "name": "self-healing-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered self-healing developer assistant: detect runtime errors from logs, generate a fix with OpenAI, and raise a GitHub pull request.",
+  "workspaces": [
+    "apps/buggy-backend",
+    "apps/self-healing-agent"
+  ],
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "setup": "npm install",
+    "dev:backend": "npm run dev --workspace @self-healing/buggy-backend",
+    "dev:agent": "npm run dev --workspace @self-healing/agent",
+    "build": "npm run build --workspace @self-healing/buggy-backend && npm run build --workspace @self-healing/agent",
+    "typecheck": "npm run typecheck --workspace @self-healing/buggy-backend && npm run typecheck --workspace @self-healing/agent",
+    "test": "npm run test --workspace @self-healing/agent && npm run test --workspace @self-healing/buggy-backend",
+    "test:agent": "npm run test --workspace @self-healing/agent",
+    "test:backend": "npm run test --workspace @self-healing/buggy-backend",
+    "trigger:bugs": "npm run trigger:bugs --workspace @self-healing/buggy-backend",
+    "logs:clear": "npm run logs:clear --workspace @self-healing/buggy-backend"
+  }
+}

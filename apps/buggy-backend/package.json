@@ -1,0 +1,41 @@
+{
+  "name": "@self-healing/buggy-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application 1 - intentionally buggy Express/TypeScript backend that emits structured error logs",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only --clear src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --runInBand",
+    "test:ci": "jest --runInBand --ci",
+    "trigger:bugs": "ts-node-dev --transpile-only scripts/trigger-bugs.ts",
+    "logs:clear": "node -e \"require('fs').writeFileSync('logs/error.log','')\""
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.2.2",
+    "source-map-support": "^0.5.21",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^20.16.10",
+    "@types/source-map-support": "^0.5.10",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
+  }
+}

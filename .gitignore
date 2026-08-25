@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.local
+*.log
+!apps/buggy-backend/logs/.gitkeep
+apps/buggy-backend/logs/*.log
+.self-healing/
+.DS_Store
+*.tsbuildinfo
