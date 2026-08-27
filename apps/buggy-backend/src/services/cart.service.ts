@@ -75,6 +75,10 @@ export class CartService {
 
     log.debug({ cartId: cart.id, code }, 'applying coupon');
 
+    if (!coupon) {
+      throw new Error(`Unknown coupon code: ${code}`);
+    }
+
     const subtotal = this.calculateSubtotal(cart);
     return (subtotal * coupon.discount.percentage) / 100;
   }
@@ -89,7 +93,7 @@ export class CartService {
 
     const subtotal = this.calculateSubtotal(cart);
     const discount = this.applyCoupon(cart, couponCode);
-    const tax = Math.round((subtotal - discount) * TAX_RATE);
+    const tax = Number(((subtotal - discount) * TAX_RATE).toFixed(2));
     const total = subtotal - discount + tax;
 
     return {
@@ -116,7 +120,7 @@ export class CartService {
 
     log.debug({ cartId, totalUnits }, 'splitting cart total per unit');
 
-    const perUnitMinor = subtotalMinor / BigInt(totalUnits);
+    const perUnitMinor = totalUnits === 0 ? 0n : subtotalMinor / BigInt(totalUnits);
 
     return { cartId: cart.id, totalUnits, perUnitMinorAmount: perUnitMinor.toString() };
   }
