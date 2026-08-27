@@ -16,6 +16,7 @@ interface Coupon {
 const COUPON_CATALOGUE: Record<string, Coupon> = {
   WELCOME10: { code: 'WELCOME10', discount: { percentage: 10 } },
   SAVE20: { code: 'SAVE20', discount: { percentage: 20 } },
+  FESTIVE50: { code: 'FESTIVE50', discount: { percentage: 50 } },
 };
 
 interface InventoryProvider {
@@ -74,6 +75,10 @@ export class CartService {
     const coupon = COUPON_CATALOGUE[code];
 
     log.debug({ cartId: cart.id, code }, 'applying coupon');
+
+    if (!coupon) {
+      return 0;
+    }
 
     const subtotal = this.calculateSubtotal(cart);
     return (subtotal * coupon.discount.percentage) / 100;
