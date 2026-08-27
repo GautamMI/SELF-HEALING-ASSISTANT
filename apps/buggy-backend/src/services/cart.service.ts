@@ -75,6 +75,10 @@ export class CartService {
 
     log.debug({ cartId: cart.id, code }, 'applying coupon');
 
+    if (!coupon) {
+      return 0;
+    }
+
     const subtotal = this.calculateSubtotal(cart);
     return (subtotal * coupon.discount.percentage) / 100;
   }
