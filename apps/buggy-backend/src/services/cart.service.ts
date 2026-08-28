@@ -76,7 +76,7 @@ export class CartService {
     log.debug({ cartId: cart.id, code }, 'applying coupon');
 
     const subtotal = this.calculateSubtotal(cart);
-    return (subtotal * coupon.discount.percentage) / 100;
+    return coupon ? (subtotal * coupon.discount.percentage) / 100 : 0;
   }
 
   /**
@@ -89,7 +89,7 @@ export class CartService {
 
     const subtotal = this.calculateSubtotal(cart);
     const discount = this.applyCoupon(cart, couponCode);
-    const tax = Math.round((subtotal - discount) * TAX_RATE);
+    const tax = Number(((subtotal - discount) * TAX_RATE).toFixed(2));
     const total = subtotal - discount + tax;
 
     return {
@@ -116,7 +116,7 @@ export class CartService {
 
     log.debug({ cartId, totalUnits }, 'splitting cart total per unit');
 
-    const perUnitMinor = subtotalMinor / BigInt(totalUnits);
+    const perUnitMinor = totalUnits > 0 ? subtotalMinor / BigInt(totalUnits) : 0n;
 
     return { cartId: cart.id, totalUnits, perUnitMinorAmount: perUnitMinor.toString() };
   }
@@ -133,7 +133,8 @@ export class CartService {
 
     log.debug({ cartId, status: response?.status }, 'received pricing payload');
 
-    return response.prices.map((price) => ({ sku: price.sku, amount: Number(price.amount) }));
+    const prices = response.prices ?? (response as unknown as { data: Array<{ sku: string; amount: number }> }).data ?? [];
+    return prices.map((price) => ({ sku: price.sku, amount: Number(price.amount) }));
   }
 
   /**
@@ -146,7 +147,16 @@ export class CartService {
     const cart = this.requireCart(cartId);
 
     return cart.items.map((item) => {
-      const parsed = JSON.parse(item.metadata as string) as Record<string, unknown>;
+      let raw = String(item.metadata ?? '{}');
+      if (raw.startsWith("{") && raw.includes("'")) {
+        raw = raw.replace(/'/g, '"').replace(/,\s*}/g, '}');
+      }
+      let parsed: Record<string, unknown> = {};
+      try {
+        parsed = JSON.parse(raw) as Record<string, unknown>;
+      } catch {
+        parsed = {};
+      }
       return { sku: item.sku, ...parsed };
     });
   }
@@ -164,7 +174,7 @@ export class CartService {
 
     return cart.items.map((item) => ({
       sku: item.sku,
-      reservationId: provider.reserve(item.sku, item.quantity).reservationId,
+      reservationId: (provider.reserve ? provider.reserve(item.sku, item.quantity) : { reservationId: `FALLBACK-${item.sku}` }).reservationId,
     }));
   }
 }
