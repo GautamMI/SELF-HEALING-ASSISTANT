@@ -89,7 +89,7 @@ export class CartService {
 
     const subtotal = this.calculateSubtotal(cart);
     const discount = this.applyCoupon(cart, couponCode);
-    const tax = Math.round((subtotal - discount) * TAX_RATE);
+    const tax = Number(((subtotal - discount) * TAX_RATE).toFixed(2));
     const total = subtotal - discount + tax;
 
     return {
