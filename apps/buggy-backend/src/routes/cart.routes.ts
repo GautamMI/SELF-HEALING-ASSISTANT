@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { cartService, CartNotFoundError } from '../services/cart.service';
 import { cartRepository } from '../services/cart.repository';
 import { asyncHandler } from '../utils/asyncHandler';
+import { SourceMapConsumer } from 'source-map';
+import fs from 'fs';
+import path from 'path';
 
 export const cartRouter = Router();
 
@@ -68,3 +71,30 @@ const cartNotFoundHandler: ErrorRequestHandler = (err, _req, res, next) => {
 };
 
 cartRouter.use(cartNotFoundHandler);
+
+const errorHandler: ErrorRequestHandler = (err: Error, _req, res, _next) => {
+  const stackLines = (err.stack ?? '').split('\n');
+  const targetLine = stackLines[1] || stackLines[0] || '';
+  const match = targetLine.match(/\((.*):(\d+):(\d+)\)/) || targetLine.match(/at\s+(.*):(\d+):(\d+)/);
+  
+  let file = 'unknown';
+  let functionName = 'unknown';
+  
+  if (match) {
+    file = match[1];
+    functionName = targetLine;
+  }
+
+  res.status(500).json({
+    error: {
+      type: err.name || 'Error',
+      message: err.message,
+      source: {
+        file,
+        function: functionName,
+      },
+    },
+  });
+};
+
+cartRouter.use(errorHandler);
